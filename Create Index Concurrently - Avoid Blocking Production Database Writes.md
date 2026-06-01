@@ -1,4 +1,4 @@
-Type: #Indexing
+# Create Index Concurrently
 
 Production database’da oddiy:
 

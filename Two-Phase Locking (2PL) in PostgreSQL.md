@@ -1,3 +1,5 @@
+# Two-Phase Locking (2PL) in PostgreSQL
+
 `Two-Phase Locking (2PL)` — bu transaction davomida lock’larni boshqarish qoidasi.
 
 Maqsad:
@@ -256,9 +258,9 @@ Bir vaqtning o‘zida 2 ta user bir seat ololmaydi.
 ## 2. Queue Worker
 
 ```sql
-SELECT * FROM jobs 
-WHERE status='pending' 
-FOR UPDATE SKIP LOCKED 
+SELECT * FROM jobs
+WHERE status='pending'
+FOR UPDATE SKIP LOCKED
 LIMIT 1;
 ```
 

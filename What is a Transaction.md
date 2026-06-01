@@ -1,4 +1,5 @@
-Type: ACID
+# What is a Transaction?
+
 **Transaction** — bajarilishi kerak bo‘lgan unitlar (querylar) to‘plami.
 #### Transaction qanday bajariladi:
 

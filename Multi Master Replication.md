@@ -1,4 +1,6 @@
-![[Pasted image 20260529121159.png]]
+# Multi-Master Replication
+
+![Multi-Master Replication Architecture](./Replication/Pasted%20image%2020260529121159.png)
 # Definition
 - Multiple databases can WRITE
 - Each master replicates changes to others

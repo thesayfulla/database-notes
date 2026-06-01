@@ -1,4 +1,4 @@
-Type: Indexing
+# The Cost of Long-running Transactions
 
 Postgres’da (yoki boshqa har qanday database’da) uzoq davom etgan va oxirida failed bo‘lgan update transaction juda katta cost keltirib chiqarishi mumkin.
 

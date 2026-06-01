@@ -1,4 +1,4 @@
-Type: Indexing
+# How Database Optimizers Decide to Use Indexes
 
 Database optimizer (query planner)
 har query uchun eng arzon execution plan tanlashga harakat qiladi.

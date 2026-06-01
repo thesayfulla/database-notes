@@ -1,5 +1,3 @@
-Type: #Indexing
-
 # PostgreSQL Scan Types
 
 ## 1. Seq Scan (Table Scan)

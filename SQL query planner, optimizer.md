@@ -1,4 +1,4 @@
-Type: Indexing
+# SQL Query Planner & Optimizer
 
 **EXPLAIN -** bu keyword orqali biz doim o’zimiz yozgan querylarni qanday ishlayotganini ko’ra olamiz
 

@@ -1,3 +1,5 @@
+# Database Pages
+
 Type: Database internal
 
 Databaselar ko‘pincha ma’lumotlarni saqlash uchun fixed-size pagelardan foydalanadi. Tables, collections, rows, columns, indexes, sequences, documents va boshqa obyektlar oxir-oqibat byte’lar ko‘rinishida page ichida saqlanadi. Shu orqali storage engine database frontend’dan ajraladi. Frontend data format va API bilan ishlasa, storage engine esa page’lar bilan ishlaydi. Bundan tashqari, hamma narsa page asosida bo‘lgani uchun data’ni read, write yoki cache qilish ancha osonlashadi.
@@ -125,7 +127,7 @@ Graph database’lar esa node va edge connectivity’ni page ichida shunday saql
 Asosiy maqsad:
 
 > Page ichiga iloji boricha foydali ma’lumot joylash.
-> 
+>
 
 Agar siz kichik ish uchun juda ko‘p page o‘qiyotgan bo‘lsangiz:
 

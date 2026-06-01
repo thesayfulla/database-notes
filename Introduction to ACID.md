@@ -1,4 +1,3 @@
-Type: ACID
 ### ACID bu nima?
 
 ACID — bu **tranzaksiyalar** (transaction) ishonchli ishlashi uchun kerak bo‘ladigan 4 ta xususiyatlar to‘plami:

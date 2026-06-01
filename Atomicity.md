@@ -1,4 +1,4 @@
-Type: #ACID
+# Atomicity
 
 Atomicity — asosiy g‘oya: barcha transaction amallari **bajarilsin** yoki **umuman bajarilmasin.**
 

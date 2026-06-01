@@ -1,3 +1,5 @@
+# Database Connection Pooling
+
 Har requestda yangi DB connection ochiladi va ish tugagach yopiladi.
 
 ```
@@ -20,10 +22,10 @@ Shuning uchun har requestda open/close qilish latency va CPU xarajatini oshiradi
 
 ```python
 # BAD
-def get_user(id):    
-	conn = psycopg.connect(...)    
-	cur = conn.cursor()    
-	cur.execute("SELECT * FROM users WHERE id=%s", (id,))    
+def get_user(id):
+	conn = psycopg.connect(...)
+	cur = conn.cursor()
+	cur.execute("SELECT * FROM users WHERE id=%s", (id,))
 	conn.close()
 ```
 
@@ -41,9 +43,9 @@ Bu database’ni o‘ldirib qo‘yishi mumkin.
 Pooling’da connection oldindan ochilib turadi va qayta ishlatiladi.
 
 ```
-Request 
--> Take existing connection from pool 
--> Query         
+Request
+-> Take existing connection from pool
+-> Query
 -> Return connection back to pool
 ```
 
@@ -54,10 +56,10 @@ Connection yopilmaydi, reuse qilinadi.
 ## Architecture
 
 ```
-App 
-├── Conn 1 
-├── Conn 2 
-├── Conn 3 
+App
+├── Conn 1
+├── Conn 2
+├── Conn 3
 └── Conn 4Requests kelganda:available connection olinadi
 ```
 
@@ -152,7 +154,7 @@ Bu production’da juda ko‘p ishlatiladi.
 # PgBouncer nima qiladi?
 
 ```
-App connections  
+App connections
 --->  PgBouncer  ---> PostgreSQL
 ```
 

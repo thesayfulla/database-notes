@@ -1,3 +1,5 @@
+# MongoDB Clustered Collections
+
 **Clustered Collection** — bu hujjatlar (documents) diskda **ma’lum bir field bo‘yicha fizik tartibda saqlanadigan collection**.
 
 Oddiy holatda MongoDB collection’larda:
@@ -76,18 +78,18 @@ db.orders.find({  createdAt: { $gte: ..., $lte: ... }})
 
 ### 🔹 Advantages
 
-✔ Kamroq disk seek  
-✔ Range query juda tez  
-✔ Index + data birga → memory efficient  
+✔ Kamroq disk seek
+✔ Range query juda tez
+✔ Index + data birga → memory efficient
 ✔ Better compression (yaqin qiymatlar yonma-yon)
 
 ---
 
 ### 🔹 Disadvantages
 
-❌ Insert qimmat (o‘rtaga insert bo‘lsa)  
-❌ Fieldni o‘zgartirib bo‘lmaydi (cluster key immutable)  
-❌ Faqat **bitta clustered index** bo‘ladi  
+❌ Insert qimmat (o‘rtaga insert bo‘lsa)
+❌ Fieldni o‘zgartirib bo‘lmaydi (cluster key immutable)
+❌ Faqat **bitta clustered index** bo‘ladi
 ❌ Noto‘g‘ri field tanlansa → performance yomonlashadi
 
 ---

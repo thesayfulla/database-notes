@@ -1,4 +1,3 @@
-Type: Partitioning
 ## Horizontal Partitioning
 
 Table row’lar bo‘yicha bo‘linadi.

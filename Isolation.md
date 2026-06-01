@@ -1,4 +1,5 @@
-Type: ACID
+# Isolation
+
 Isolation — bir nechta transaction bir vaqtda ishlaganda, ular bir-biriga xalaqit bermasligi kerak.
 
 Maqsad:

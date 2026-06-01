@@ -1,3 +1,5 @@
+# What is Database Cursors?
+
 Database cursor — query natijasini **row-by-row** o‘qish uchun ishlatiladigan object.
 
 Cursor bo‘lmasa database barcha rowlarni birdan yuboradi.
@@ -36,24 +38,22 @@ Rowlar bittadan process qilinadi.
 ## Good For
 
 - katta dataset
-    
+
 - memory tejash
-    
+
 - streaming data
-    
+
 - batch processing
-    
+
 - background jobs
-    
 
 ## Bad For
 
 - oddiy CRUD
-    
+
 - kichik querylar
-    
+
 - high-performance OLTP system
-    
 
 Ko‘pincha set-based SQL cursor’dan tezroq ishlaydi.
 
@@ -123,29 +123,26 @@ App -> FETCH next 100 rows
 ## Advantages
 
 - memory kam ishlatiladi
-    
+
 - katta dataset bilan ishlay oladi
-    
+
 - ETL va batch processing uchun yaxshi
-    
 
 ## Disadvantages
 
 - DB resource uzoq band bo‘ladi
-    
+
 - long transaction paydo bo‘lishi mumkin
-    
+
 - network round-trip ko‘payadi
-    
 
 ### Real Examples
 
 - millionlab row export qilish
-    
+
 - analytics pipeline
-    
+
 - data migration
-    
 
 ---
 
@@ -162,27 +159,24 @@ Keyin local iteratsiya qiladi.
 ## Advantages
 
 - oddiy
-    
+
 - DB call kam
-    
+
 - kichik querylarda tez
-    
 
 ## Disadvantages
 
 - RAM ko‘p ishlatadi
-    
+
 - katta dataset uchun yomon
-    
 
 ### Real Examples
 
 - admin panel
-    
+
 - dashboard
-    
+
 - oddiy web request
-    
 
 ---
 
@@ -197,9 +191,8 @@ logs = db.query("SELECT * FROM logs")
 Muammo:
 
 - 10 million row RAM’ga yuklanadi
-    
+
 - application crash bo‘lishi mumkin
-    
 
 ---
 
@@ -213,9 +206,8 @@ for row in cursor.fetchmany(1000):
 Natija:
 
 - rowlar stream bo‘lib keladi
-    
+
 - memory stabil qoladi
-    
 
 ---
 

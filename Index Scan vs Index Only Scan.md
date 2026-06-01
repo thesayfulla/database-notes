@@ -1,4 +1,3 @@
-Type: Indexing
 # 1. Index Scan nima?
 ---
 Index Scan’da:

@@ -1,4 +1,3 @@
-Type: Indexing
 # Index nima?
 
 ---

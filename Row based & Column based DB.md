@@ -1,3 +1,5 @@
+# Row-based & Column-based Databases
+
 Type: Database internal
 ### Row based DB
 - Ma’lumotlar row (satr) bo‘yicha saqlanadi.

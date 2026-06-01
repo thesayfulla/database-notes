@@ -1,3 +1,5 @@
+# Shared vs Exclusive Locks
+
 Type: Concurrency Control
 
 ## Shared Lock (S Lock)

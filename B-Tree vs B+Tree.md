@@ -1,5 +1,3 @@
-Type: #BTree
-
 ## B-Tree
 
 - Data internal node va leaf node’larda saqlanishi mumkin

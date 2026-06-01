@@ -1,4 +1,4 @@
-Type: #ACID
+# Durability
 
 **Durability —** bu o'zbekchda chidamlilik degani bo'ladi ammo bu unchalik ham to'g'ri emas ammo qisman to'g'ri , Bu nima degani o'zi biz databazaga ma’lumotni yozib bo'lganimizdan so'ng svet o'chib qolsa databaza qulasa hamma uni qayta yoqqanimda ma’lumotlar shu yerda turishi kerak. Masalan siz databazaga tranzaksiyani commit qildingiz ammo shu paytda hamma joyda internet uzildi ammo internet tiklangandan so'ng u ma'lumotlar turgan bo'lishi kerak chunki ular diskda saqlanadi.
 

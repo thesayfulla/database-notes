@@ -1,4 +1,8 @@
-![[Pasted image 20260529120508.png]]Bitta asosiy **master** bo'ladi, u asosan DDLs uchun ishlatilinadi. lekin qolgan **standby**larni esa shunchaki reading operation uchun ishlatsak bo'ladi holos.
+# Master-Standby Replication
+
+![Replication Architecture](./Replication/Pasted%20image%2020260529120508.png)
+
+Bitta asosiy **master** bo'ladi, u asosan DDLs uchun ishlatilinadi. lekin qolgan **standby**larni esa shunchaki reading operation uchun ishlatsak bo'ladi holos.
 ### CORE LOGIC:
 - Master (Primary) = main database
 - Standby (Replica) = copied database

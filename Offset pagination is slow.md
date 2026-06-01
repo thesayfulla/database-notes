@@ -1,3 +1,5 @@
+# Offset Pagination is Slow
+
 `OFFSET` sekin bo‘lishining asosiy sababi:
 
 ```
@@ -80,7 +82,7 @@ PostgreSQL roughly:
 
 # EXPLAIN ANALYZE’da ko‘rinishi
 
-```sql 
+```sql
 EXPLAIN ANALYZE SELECT * FROM posts ORDER BY id LIMIT 10 OFFSET 1000000;
 ```
 
@@ -182,7 +184,7 @@ Million row discard qilmaydi.
 
 ```
 start ↓
-1 2 3 4 5 6 7 8 ... 1000000                    
+1 2 3 4 5 6 7 8 ... 1000000
 					↑  finally
 ```
 

@@ -1,4 +1,4 @@
-Type: Indexing
+# Indexing
 
 **Index** — [Database](https://wiki.42.uz/Database.md) tezligining sirli kaliti. Kitobning oxiridagi ko'rsatkich kabi.
 
