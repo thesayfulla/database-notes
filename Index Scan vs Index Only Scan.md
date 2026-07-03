@@ -14,9 +14,9 @@ Index -> Heap(Table)
 
 ```sql
 CREATE TABLE users (
-id BIGSERIAL PRIMARY KEY,
-email TEXT,
-name TEXT
+    id BIGSERIAL PRIMARY KEY,
+    email TEXT,
+    name TEXT
 );
 CREATE INDEX idx_users_email
 ON users(email);
@@ -55,11 +55,12 @@ Masalan:
 ---
 
 # EXPLAIN
-
+```sql
 EXPLAIN ANALYZE
 SELECT *
 FROM users
 WHERE email = 'a@gmail.com';
+```
 
 Natija:
 
@@ -111,19 +112,19 @@ index ichida bo‘ladi.
 ---
 
 # Misol
-
+```sql
 CREATE INDEX idx_users_email_include
 ON users(email)
 INCLUDE(name);
-
+```
 ---
 
 # Query
-
+```sql
 SELECT email, name
 FROM users
 WHERE email = 'a@gmail.com';
-
+```
 ---
 
 # Nima bo‘ladi?

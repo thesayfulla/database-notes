@@ -11,7 +11,7 @@ Reading turlari:
 
 - Dirty reads — transaction hali commit bo‘lmasidan turib o‘zgarishlarni ko‘rish, ya’ni hech qanday snapshot yaratilmaydi.
 
-![Screenshot 2026-05-17 at 12.07.25.png](Screenshot_2026-05-17_at_12.07.25.png)
+![Screenshot 2026-05-17 at 12.07.25.png](./Isolation/Screenshot_2026-05-17_at_12.07.25.png)
 
 Dirty reads muammosini yechish uchun ushbu komandadan foydalanamiz, lekin PostgreSQL’da bu default bo‘ladi:
 
@@ -21,12 +21,12 @@ SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
 - Non repeatable reads — bu yerda COMMIT ishlagan bo‘ladi, lekin oxirgi queryda baribir xatoliklar yuzaga kelaveradi.
 
-![Screenshot 2026-05-17 at 12.13.58.png](Screenshot_2026-05-17_at_12.13.58.png)
+![Screenshot 2026-05-17 at 12.13.58.png](./Isolation/Screenshot_2026-05-17_at_12.13.58.png)
 
 - Phantom read — bir transaction biror shart (masalan, `WHERE`) bilan qatorlarni o‘qiydi, ikkinchi transaction esa shu oraliqda shu shartga mos keladigan yangi qator(lar)ni INSERT qiladi yoki mavjudlarini shunday UPDATE qiladi. Birinchi transaction o‘sha queryni qayta bajarganda natijalar soni o‘zgarib ketadi ("phantom" qatorlar paydo bo‘ladi).
 Odatda buni `REPEATABLE READ` yoki `SERIALIZABLE` izolatsiya darajalari oldini oladi. PostgreSQL’da `REPEATABLE READ` snapshot asosida ishlaydi va phantom read’larni amalda bloklaydi; eng qat’iy daraja `SERIALIZABLE` bo‘lib, kerak bo‘lsa conflict bo‘lganda transaction’ni qayta urinishga majbur qiladi.
 
-![image.png](Database%20notes/Isolation/image.png)
+![image.png](./Isolation/image.png)
 
 ### Isolation — transactionlar ishlayotgan paytda isolation level’lar
 
