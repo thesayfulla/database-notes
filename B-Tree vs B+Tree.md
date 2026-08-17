@@ -1,3 +1,5 @@
+# B-Tree vs B+ Tree
+
 ## B-Tree
 
 - Data internal node va leaf node’larda saqlanishi mumkin
@@ -11,15 +13,13 @@
 
 ### Misol
 
-```
+```text
         [20]
        /    \
    [10]    [30,40]
 ```
 
 Data yuqoridagi node’larda ham bo‘lishi mumkin.
-
----
 
 ## B+ Tree
 
@@ -31,7 +31,7 @@ Data yuqoridagi node’larda ham bo‘lishi mumkin.
 
 ### Misol
 
-```
+```text
         [20]
        /    \
     [10]   [30]
@@ -40,29 +40,25 @@ Leaf:
 [1,5,10] -> [20,25] -> [30,40]
 ```
 
----
+## Asosiy farqlar
 
-# Asosiy farqlar
+| Feature                | B-Tree                | B+ Tree                                                                       |
+| ---------------------- | --------------------- | ----------------------------------------------------------------------------- |
+| Data qayerda saqlanadi | Hamma node’larda      | Faqat leaf’da                                                                 |
+| Search                 | Erta tugashi mumkin   | Har doim leaf’gacha                                                           |
+| Range query            | Sekinroq              | **Juda tez** (chunki leaf’lar linked bo‘lib, kerakli ma’lumotlar bog‘langan)   |
+| Leaf node link         | Yo‘q                  | Bor                                                                           |
+| Disk performance       | Yaxshi                | Juda yaxshi                                                                   |
+| DB index uchun         | Kam ishlatiladi       | Eng ko‘p ishlatiladi                                                          |
 
-| Feature | B-Tree | B+ Tree |
-| --- | --- | --- |
-| Data qayerda saqlanadi | Hamma node’larda | Faqat leaf’da |
-| Search | Erta tugashi mumkin | Har doim leaf’gacha |
-| Range query | Sekinroq | **Juda tez(chunki linkedin bo’lib aynan kerakli ma’lumotlar yana bog’langan)** |
-| Leaf node link | Yo‘q | Bor |
-| Disk performance | Yaxshi | Juda yaxshi |
-| DB index uchun | Kam ishlatiladi | Eng ko‘p ishlatiladi |
+## Qachon ishlatiladi?
 
----
-
-# Qachon ishlatiladi?
-
-## B-Tree
+### B-Tree
 
 - Point lookup muhim bo‘lsa
 - Kichik sistemalarda
 
-## B+ Tree
+### B+ Tree
 
 - Database index
 - File system
@@ -70,11 +66,9 @@ Leaf:
 - Sorting
 - Large scale storage
 
----
+## Real hayot
 
-# Real Hayot
-
-## B+ Tree ishlatadigan DB’lar
+### B+ Tree ishlatadigan DB’lar
 
 - PostgreSQL
 - MySQL
@@ -89,16 +83,12 @@ WHERE age BETWEEN 20 AND 30;
 
 B+ Tree leaf node’lari linked bo‘lgani uchun juda tez ishlaydi.
 
----
+## Qisqa xulosa
 
-# Qisqa Xulosa
-
-```
+```text
 B-Tree  = data everywhere
 B+ Tree = data only in leaves
-```
 
-```
 B-Tree  → point lookup
 B+ Tree → databases & range queries
 ```

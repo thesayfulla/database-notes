@@ -12,27 +12,23 @@ Clustered collection’da esa:
 - data **index tartibida diskka yoziladi**
 - ya’ni **index = storage order**
 
----
-
-### 🔹 Simple tushuncha
+## 🔹 Simple tushuncha
 
 Oddiy collection:
 
-```
-Disk:[doc3] [doc1] [doc5] [doc2]
-Index:_id → pointer to doc
+```text
+Disk:  [doc3] [doc1] [doc5] [doc2]
+Index: _id → pointer to doc
 ```
 
 Clustered collection:
 
-```
-Disk:[doc1] [doc2] [doc3] [doc5]
+```text
+Disk:  [doc1] [doc2] [doc3] [doc5]
 (Index order = physical order)
 ```
 
----
-
-### 🔹 Qanday ishlaydi?
+## 🔹 Qanday ishlaydi?
 
 Clustered collection yaratishda:
 
@@ -44,7 +40,12 @@ Clustered collection yaratishda:
 Example:
 
 ```js
-db.createCollection("orders", {  clusteredIndex: {    key: { createdAt: 1 },    unique: true  }})
+db.createCollection("orders", {
+  clusteredIndex: {
+    key: { createdAt: 1 },
+    unique: true
+  }
+})
 ```
 
 Bu yerda:
@@ -52,9 +53,7 @@ Bu yerda:
 - `createdAt` → **physical order**
 - har bir yangi document → **to‘g‘ri joyga insert qilinadi**
 
----
-
-### 🔹 Qachon ishlatish kerak?
+## 🔹 Qachon ishlatish kerak?
 
 **1. Time-series data**
 
@@ -69,50 +68,42 @@ Sababi:
 **2. Range queries tezlashadi**
 
 ```js
-db.orders.find({  createdAt: { $gte: ..., $lte: ... }})
+db.orders.find({
+  createdAt: { $gte: ..., $lte: ... }
+})
 ```
 
 👉 Disk scan → sequential (SSD friendly)
 
----
+## 🔹 Advantages
 
-### 🔹 Advantages
+- ✔ Kamroq disk seek
+- ✔ Range query juda tez
+- ✔ Index + data birga → memory efficient
+- ✔ Better compression (yaqin qiymatlar yonma-yon)
 
-✔ Kamroq disk seek
-✔ Range query juda tez
-✔ Index + data birga → memory efficient
-✔ Better compression (yaqin qiymatlar yonma-yon)
+## 🔹 Disadvantages
 
----
+- ❌ Insert qimmat (o‘rtaga insert bo‘lsa)
+- ❌ Fieldni o‘zgartirib bo‘lmaydi (cluster key immutable)
+- ❌ Faqat **bitta clustered index** bo‘ladi
+- ❌ Noto‘g‘ri field tanlansa → performance yomonlashadi
 
-### 🔹 Disadvantages
+## 🔹 Clustered vs Normal Collection
 
-❌ Insert qimmat (o‘rtaga insert bo‘lsa)
-❌ Fieldni o‘zgartirib bo‘lmaydi (cluster key immutable)
-❌ Faqat **bitta clustered index** bo‘ladi
-❌ Noto‘g‘ri field tanlansa → performance yomonlashadi
+| Feature       | Normal    | Clustered       |
+| ------------- | --------- | --------------- |
+| Storage order | Random    | Sorted          |
+| Index         | Separate  | Built-in        |
+| Insert speed  | Fast      | Sometimes slower|
+| Range query   | Medium    | Very fast       |
 
----
-
-### 🔹 Clustered vs Normal Collection
-
-|Feature|Normal|Clustered|
-|---|---|---|
-|Storage order|Random|Sorted|
-|Index|Separate|Built-in|
-|Insert speed|Fast|Sometimes slower|
-|Range query|Medium|Very fast|
-
----
-
-### 🔹 Real-life analogy
+## 🔹 Real-life analogy
 
 - Normal collection → kitoblar stol ustida tartibsiz
 - Clustered → kitoblar **alfavit bo‘yicha tokchada**
 
----
-
-### 🔹 Important note
+## 🔹 Important note
 
 - MongoDB’da bu feature nisbatan **yangi (5.3+)**
 - Default `_id` clustered bo‘lishi mumkin (internal optimization)

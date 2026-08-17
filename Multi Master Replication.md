@@ -1,7 +1,9 @@
 # Multi-Master Replication
 
-![Multi-Master Replication Architecture](./Replication/Pasted%20image%2020260529121159.png)
-# Definition
+![Multi-Master replication architecture](./Replication/Pasted%20image%2020260529121159.png)
+
+### Definition
+
 - Multiple databases can WRITE
 - Each master replicates changes to others
 - Every node can handle:
@@ -16,13 +18,13 @@
 
 ### Problems
 
-```
+```text
 Conflict Resolution
 ```
 
 Example:
 
-```
+```text
 User updated same row on two masters
 at same time
 ```
@@ -33,24 +35,24 @@ System must decide:
 - merge?
 - reject?
 
-### Common Issues
+### Common issues
 
 - Data conflicts
 - Replication loops
 - Complex consistency management
 
-### Real Usage
+### Real usage
 
-```
+```text
 Global applications
 Multi-region systems
 ```
 
 ### Comparison
 
-|Feature|Master-Standby|Multi-Master|
-|---|---|---|
-|Writes|One node|Multiple nodes|
-|Complexity|Lower|Higher|
-|Conflict Risk|Low|High|
-|Scaling|Read scaling|Read + Write scaling|
+| Feature       | Master-Standby | Multi-Master          |
+| ------------- | -------------- | --------------------- |
+| Writes        | One node       | Multiple nodes        |
+| Complexity    | Lower          | Higher                |
+| Conflict Risk | Low            | High                  |
+| Scaling       | Read scaling   | Read + Write scaling  |

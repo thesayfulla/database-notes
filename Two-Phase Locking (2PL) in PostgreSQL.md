@@ -1,19 +1,18 @@
 # Two-Phase Locking (2PL) in PostgreSQL
 
-`Two-Phase Locking (2PL)` — bu transaction davomida lock’larni boshqarish qoidasi.
+Two-Phase Locking (2PL) — bu transaction davomida lock’larni boshqarish qoidasi.
 
 Maqsad:
+
 - data consistency saqlash
 - race condition oldini olish
 - concurrent transaction’larni xavfsiz ishlatish
 
----
+## 2PL qanday ishlaydi?
 
-# 2PL qanday ishlaydi?
+2 ta phase bor.
 
-2 ta phase bor:
-
-## 1. Growing Phase
+### 1. Growing Phase
 
 Transaction:
 
@@ -25,15 +24,13 @@ Misol:
 ```sql
 BEGIN;
 
-SELECT * FROM users WHERE id=1 FOR UPDATE;
-UPDATE users SET balance=500 WHERE id=1;
+SELECT * FROM users WHERE id = 1 FOR UPDATE;
+UPDATE users SET balance = 500 WHERE id = 1;
 ```
 
 Bu yerda lock olinmoqda.
 
----
-
-## 2. Shrinking Phase
+### 2. Shrinking Phase
 
 Transaction:
 
@@ -44,26 +41,17 @@ Bu phase odatda:
 
 ```sql
 COMMIT;
-
--- yokiROLLBACK;
+-- yoki
+ROLLBACK;
 ```
 
 dan keyin boshlanadi.
 
----
+## PostgreSQL’da 2PL bormi?
 
-# PostgreSQL’da 2PL bormi?
+Ha, lekin PostgreSQL toza "strict 2PL database" emas.
 
-Ha, lekin:
-
-PostgreSQL toza “strict 2PL database” emas.
-
-U:
-
-- `MVCC (Multi-Version Concurrency Control)`
-- - locking
-
-kombinatsiyasidan foydalanadi.
+U MVCC (Multi-Version Concurrency Control) va locking kombinatsiyasidan foydalanadi.
 
 Ammo:
 
@@ -74,30 +62,28 @@ Ammo:
 
 2PL behavior beradi.
 
----
+## Real example
 
-# Real Example
+### Bank transfer
 
-## Bank transfer
-
-### Transaction A
+Transaction A:
 
 ```sql
 BEGIN;
-SELECT * FROM accounts WHERE id=1 FOR UPDATE;
-UPDATE accountsSET balance = balance - 100WHERE id=1;
+SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
+UPDATE accounts
+SET balance = balance - 100
+WHERE id = 1;
 
--- hali commit yo'q
+-- hali commit yo‘q
 ```
 
 Bu row lock bo‘ladi.
 
----
-
-### Transaction B
+Transaction B:
 
 ```sql
-UPDATE accounts SET balance = balance + 50 WHERE id=1;
+UPDATE accounts SET balance = balance + 50 WHERE id = 1;
 ```
 
 Transaction B kutadi.
@@ -109,9 +95,7 @@ Sabab:
 
 Bu strict 2PL behavior.
 
----
-
-# Strict 2PL nima?
+## Strict 2PL nima?
 
 Oddiy 2PL:
 
@@ -123,56 +107,51 @@ Strict 2PL:
 
 PostgreSQL write lock’larda asosan strict behavior qiladi.
 
----
+## PostgreSQL’da lock types
 
-# PostgreSQL’da Lock Types
-
-## Row-Level Locks
+### Row-level locks
 
 ```sql
-FOR UPDATE FOR SHAREFOR NO KEY UPDATE FOR KEY SHARE
+FOR UPDATE
+FOR SHARE
+FOR NO KEY UPDATE
+FOR KEY SHARE
 ```
 
----
-
-## Table Locks
+### Table locks
 
 ```sql
 LOCK TABLE users IN ACCESS EXCLUSIVE MODE;
 ```
 
----
-
-# Muammo: Deadlock
+## Muammo: deadlock
 
 2PL’ning eng katta muammosi.
 
-## Misol
+### Misol
 
-### Transaction A
+Transaction A:
 
-```
-UPDATE users SET ... WHERE id=1;
-```
-
-### Transaction B
-
-```
-UPDATE users SET ... WHERE id=2;
+```sql
+UPDATE users SET ... WHERE id = 1;
 ```
 
-Keyin:
+Transaction B:
 
-### A
-
-```
-UPDATE users SET ... WHERE id=2;
+```sql
+UPDATE users SET ... WHERE id = 2;
 ```
 
-### B
+Keyin A:
 
+```sql
+UPDATE users SET ... WHERE id = 2;
 ```
-UPDATE users SET ... WHERE id=1;
+
+Keyin B:
+
+```sql
+UPDATE users SET ... WHERE id = 1;
 ```
 
 Natija:
@@ -184,43 +163,32 @@ Natija:
 
 PostgreSQL bittasini o‘ldiradi:
 
-```
+```text
 ERROR: deadlock detected
 ```
 
----
+## Deadlock oldini olish
 
-# Deadlock oldini olish
+### 1. Bir xil order ishlatish
 
-## 1. Bir xil order ishlatish
+Har doim `id ASC` bo‘yicha update qilish.
 
-Har doim:
-
-```
-id ASC
-```
-
-bo‘yicha update qilish.
-
----
-
-## 2. Transaction’ni qisqa saqlash
+### 2. Transaction’ni qisqa saqlash
 
 Yomon:
 
 ```sql
-BEGIN; UPDATE ...sleep(20) COMMIT;
+BEGIN;
+UPDATE ...
+-- sleep(20)
+COMMIT;
 ```
 
----
-
-## 3. Keraksiz lock olmaslik
+### 3. Keraksiz lock olmaslik
 
 `FOR UPDATE` ni faqat kerak bo‘lsa ishlatish.
 
----
-
-# MVCC vs 2PL
+## MVCC vs 2PL
 
 | MVCC                   | 2PL                     |
 | ---------------------- | ----------------------- |
@@ -229,9 +197,7 @@ BEGIN; UPDATE ...sleep(20) COMMIT;
 | PostgreSQL default     | Traditional DB approach |
 | High concurrency       | Simpler consistency     |
 
----
-
-# PostgreSQL’da qachon 2PL’ni his qilasiz?
+## PostgreSQL’da qachon 2PL’ni his qilasiz?
 
 Ko‘pincha:
 
@@ -241,40 +207,32 @@ Ko‘pincha:
 - queue workers
 - booking systems
 
----
+## Real production examples
 
-# Real Production Examples
-
-## 1. Seat Booking
+### 1. Seat booking
 
 ```sql
-SELECT * FROM seats WHERE id=10 FOR UPDATE;
+SELECT * FROM seats WHERE id = 10 FOR UPDATE;
 ```
 
 Bir vaqtning o‘zida 2 ta user bir seat ololmaydi.
 
----
-
-## 2. Queue Worker
+### 2. Queue worker
 
 ```sql
 SELECT * FROM jobs
-WHERE status='pending'
+WHERE status = 'pending'
 FOR UPDATE SKIP LOCKED
 LIMIT 1;
 ```
 
 Worker’lar bir job’ni 2 marta ishlamaydi.
 
----
-
-## 3. Money Transfer
+### 3. Money transfer
 
 Balance consistency uchun row lock kerak.
 
----
-
-# Muhim Idea
+## Muhim idea
 
 PostgreSQL:
 

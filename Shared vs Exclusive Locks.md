@@ -37,24 +37,24 @@ WHERE id=1;
 
 ---
 
-## Real Example
+## Real example
 
-### Shared Lock
+### Shared lock
 
 - 1000 user balansni ko‘ryapti
 - Hamma faqat read qilyapti
 - Shared lock yetarli
 
-### Exclusive Lock
+### Exclusive lock
 
 - Ikki user bir vaqtda pul yechmoqda
 - Race condition oldini olish uchun row lock qilinadi
 
 ---
 
-## Short Table
+## Short table
 
-| Lock | Read | Write | Multiple Transactions |
-| --- | --- | --- | --- |
-| Shared | ✅ | ❌ | ✅ |
-| Exclusive | ❌ | ❌ | ❌ |
+| Lock      | Read | Write | Multiple Transactions |
+| --------- | ---- | ----- | --------------------- |
+| Shared    | ✅   | ❌    | ✅                    |
+| Exclusive | ❌   | ❌    | ❌                    |

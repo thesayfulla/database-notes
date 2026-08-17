@@ -1,6 +1,7 @@
 # Row-based & Column-based Databases
 
 ### Row based DB
+
 - Ma’lumotlar row (satr) bo‘yicha saqlanadi.
 - Bitta user haqidagi barcha columnlar bir joyda turadi.
 - INSERT, UPDATE, DELETE juda tez ishlaydi.
@@ -9,12 +10,13 @@
 - Misollar: PostgreSQL, MySQL, Oracle.
 
 ### Column based DB
+
 - Ma’lumotlar column bo‘yicha saqlanadi.
 - Har bir column alohida saqlanadi.
 - Analytics querylar juda tez ishlaydi.
 - Aggregation va reporting uchun kuchli.
 - OLAP systems uchun ideal.
-- Writing juda sekin
+- Writing juda sekin.
 - Misollar: ClickHouse, BigQuery, Snowflake.
 
 ### OLTP

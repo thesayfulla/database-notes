@@ -1,26 +1,8 @@
-# Index nima?
+# Key vs Non-key Column Database Indexing
 
----
+## Index nima?
 
-Index — bu data’ni tez qidirish uchun yaratiladigan
-alohida sorted structure.
-
-Misol:
-
-```sql
-CREATE INDEX idx_users_email
-ON users(email);
-```
-
-Bu yerda Postgres email bo‘yicha
-sorted B-Tree yaratadi.
-
----
-
-# Key Column nima?
-
-Key column — index sorting va searching’da
-qatnashadigan column.
+Index — bu data’ni tez qidirish uchun yaratiladigan alohida sorted structure.
 
 Misol:
 
@@ -29,32 +11,34 @@ CREATE INDEX idx_users_email
 ON users(email);
 ```
 
-Bu yerda:
+Bu yerda Postgres email bo‘yicha sorted B-Tree yaratadi.
 
-Key Column:
+## Key column nima?
+
+Key column — index sorting va searching’da qatnashadigan column.
+
+Misol:
+
+```sql
+CREATE INDEX idx_users_email
+ON users(email);
+```
+
+Bu yerda key column:
 
 - email
 
-Sababi:
-index email bo‘yicha sorted bo‘ladi.
+Sababi: index email bo‘yicha sorted bo‘ladi.
 
 Taxminan:
 
-```
-[a@gmail.com](mailto:a@gmail.com)
-```
-
-```
-[b@gmail.com](mailto:b@gmail.com)
+```text
+a@gmail.com
+b@gmail.com
+c@gmail.com
 ```
 
-```
-[c@gmail.com](mailto:c@gmail.com)
-```
-
----
-
-# Key Column vazifasi
+### Key column vazifasi
 
 Key column:
 
@@ -65,29 +49,26 @@ Key column:
 - ORDER BY uchun ishlaydi
 - JOIN uchun ishlaydi
 
----
-
-# Index ichida nima saqlanadi?
+## Index ichida nima saqlanadi?
 
 Taxminan:
 
+```text
 email -> row pointer (TID)
+```
 
 Misol:
 
-[a@gmail.com](mailto:a@gmail.com) -> row 10
-[b@gmail.com](mailto:b@gmail.com) -> row 25
+```text
+a@gmail.com -> row 10
+b@gmail.com -> row 25
+```
 
 Index actual data emas.
 
-U faqat:
-"value -> location"
+U faqat "value -> location" mapping saqlaydi.
 
-mapping saqlaydi.
-
----
-
-# Query ishlashi
+### Query ishlashi
 
 ```sql
 SELECT *
@@ -102,20 +83,13 @@ Postgres:
 3. Heap(table)ga boradi
 4. Actual row’ni o‘qiydi
 
----
+## Non-key column nima?
 
-# Non-Key Column nima?
-
-Non-key column —
-index ichida saqlanadigan,
-lekin sorting/search uchun ishlatilmaydigan
-column.
+Non-key column — index ichida saqlanadigan, lekin sorting/search uchun ishlatilmaydigan column.
 
 PostgreSQL’da INCLUDE orqali qo‘shiladi.
 
----
-
-# INCLUDE misoli
+### INCLUDE misoli
 
 ```sql
 CREATE INDEX idx_users_email
@@ -123,25 +97,23 @@ ON users(email)
 INCLUDE(name, age);
 ```
 
-Bu yerda:
-
-Key Column:
+Bu yerda key column:
 
 - email
 
-Non-Key Columns:
+Non-key columns:
 
 - name
 - age
 
----
-
-# INCLUDE qanday ishlaydi?
+### INCLUDE qanday ishlaydi?
 
 Index ichida taxminan:
 
-[a@gmail.com](mailto:a@gmail.com) -> Ali, 25
-[b@gmail.com](mailto:b@gmail.com) -> Vali, 30
+```text
+a@gmail.com -> Ali, 25
+b@gmail.com -> Vali, 30
+```
 
 Lekin:
 
@@ -150,9 +122,7 @@ Lekin:
 
 Ular faqat extra payload.
 
----
-
-# Nima uchun INCLUDE kerak?
+### Nima uchun INCLUDE kerak?
 
 Query:
 
@@ -162,92 +132,74 @@ FROM users
 WHERE email = 'a@gmail.com';
 ```
 
-Agar INCLUDE bo‘lmasa:
+Agar INCLUDE bo‘lmasa, `index -> heap(table)` borish kerak bo‘ladi.
 
-index -> heap(table)
+INCLUDE bo‘lsa, kerakli data index ichida bo‘ladi.
 
-borish kerak bo‘ladi.
+## Index Only Scan
 
-INCLUDE bo‘lsa:
+Agar kerakli column’larning hammasi index ichida bo‘lsa, Postgres heap’ga bormaydi.
 
-kerakli data index ichida bo‘ladi.
-
----
-
-# Index Only Scan
-
-Agar kerakli column’larning hammasi
-index ichida bo‘lsa:
-
-Postgres heap’ga bormaydi.
-
-Bu:
-
-Index Only Scan
-
-deyiladi.
+Bu Index Only Scan deyiladi.
 
 Bu juda tez ishlaydi.
 
----
+## Composite key columns
 
-# Composite Key Columns
-
+```sql
 CREATE INDEX idx_users
 ON users(country, city);
+```
 
-Key Columns:
+Key columns:
 
 1. country
 2. city
 
-Sorting:
+Sorting `(country, city)` bo‘yicha bo‘ladi.
 
-(country, city)
+### Left-most prefix rule
 
-bo‘yicha bo‘ladi.
+`(country, city)` index quyidagi query’lar uchun yaxshi:
 
----
-
-# Left-most Prefix Rule
-
-(country, city)
-
-index quyidagi query’lar uchun yaxshi:
-
+```sql
 WHERE country = 'UZ'
+```
 
 yoki:
 
+```sql
 WHERE country = 'UZ'
 AND city = 'Tashkent'
+```
 
 Lekin:
 
+```sql
 WHERE city = 'Tashkent'
+```
 
 uchun yaxshi emas.
 
-Sababi:
-sorting country bilan boshlanadi.
+Sababi: sorting country bilan boshlanadi.
 
----
+## INCLUDE vs Composite Index
 
-# INCLUDE vs Composite Index
-
+```sql
 CREATE INDEX idx1
 ON users(country, city);
+```
 
 Bu yerda:
 
 - country search qiladi
 - city ham search qiladi
 
----
-
+```sql
 CREATE INDEX idx2
 ON users(country)
 INCLUDE(city);
+```
 
 Bu yerda:
 
@@ -256,9 +208,7 @@ Bu yerda:
 
 city sorting/search’da qatnashmaydi.
 
----
-
-# Key Column qachon ishlatiladi?
+## Key column qachon ishlatiladi?
 
 Ko‘p ishlatiladigan:
 
@@ -268,19 +218,13 @@ Ko‘p ishlatiladigan:
 
 column’lar key column bo‘lishi kerak.
 
----
+## INCLUDE qachon ishlatiladi?
 
-# INCLUDE qachon ishlatiladi?
+Ko‘p SELECT qilinadigan, lekin filtering qilinmaydigan column’lar uchun ishlatiladi.
 
-Ko‘p SELECT qilinadigan,
-lekin filtering qilinmaydigan
-column’lar uchun ishlatiladi.
+## Afzalliklari
 
----
-
-# Afzalliklari
-
-Key Columns:
+Key columns:
 
 - fast searching
 - fast sorting
@@ -291,9 +235,7 @@ INCLUDE:
 - Index Only Scan ishlaydi
 - disk I/O kamayadi
 
----
-
-# Kamchiliklari
+## Kamchiliklari
 
 INCLUDE juda ko‘p ishlatilsa:
 
@@ -301,41 +243,32 @@ INCLUDE juda ko‘p ishlatilsa:
 - RAM ko‘proq ishlatiladi
 - INSERT/UPDATE sekinlashadi
 
----
+## Real hayot analogiyasi
 
-# Real Hayot Analogiyasi
-
-Key Column:
+Key column:
 
 - kutubxonadagi shelf tartibi
 
-Non-Key Column:
+Non-key column:
 
 - kitob ichidagi qo‘shimcha ma’lumot
 
----
+## Qisqa xulosa
 
-# Qisqa Xulosa
-
-Key Column:
+Key column:
 
 - sorting
 - searching
 - B-Tree navigation
 
-Non-Key Column:
+Non-key column:
 
 - extra payload
 - covering query
 - Index Only Scan
 
----
-
-# Muhim Eslab Qolish
+## Muhim eslab qolish
 
 B-Tree faqat key column bilan ishlaydi.
 
-INCLUDE columns:
-"carry-along data"
-
-xolos.
+INCLUDE columns — "carry-along data", xolos.

@@ -2,7 +2,7 @@
 
 Har requestda yangi DB connection ochiladi va ish tugagach yopiladi.
 
-```
+```text
 Request -> Open Connection -> Query -> Close Connection
 ```
 
@@ -23,10 +23,10 @@ Shuning uchun har requestda open/close qilish latency va CPU xarajatini oshiradi
 ```python
 # BAD
 def get_user(id):
-	conn = psycopg.connect(...)
-	cur = conn.cursor()
-	cur.execute("SELECT * FROM users WHERE id=%s", (id,))
-	conn.close()
+    conn = psycopg.connect(...)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE id=%s", (id,))
+    conn.close()
 ```
 
 1000 request/sec bo‘lsa:
@@ -36,13 +36,11 @@ def get_user(id):
 
 Bu database’ni o‘ldirib qo‘yishi mumkin.
 
----
-
-# Connection Pooling
+## Connection Pooling
 
 Pooling’da connection oldindan ochilib turadi va qayta ishlatiladi.
 
-```
+```text
 Request
 -> Take existing connection from pool
 -> Query
@@ -51,21 +49,19 @@ Request
 
 Connection yopilmaydi, reuse qilinadi.
 
----
+### Architecture
 
-## Architecture
-
-```
+```text
 App
 ├── Conn 1
 ├── Conn 2
 ├── Conn 3
-└── Conn 4Requests kelganda:available connection olinadi
+└── Conn 4
+
+Requests kelganda: available connection olinadi
 ```
 
----
-
-# Nega pooling juda muhim?
+## Nega pooling juda muhim?
 
 ### 1. Performance
 
@@ -89,19 +85,15 @@ Masalan:
 - appda 5000 user
 - DB’da faqat 50 connection
 
----
-
 ### 3. Better concurrency
 
 Requestlar navbat bilan connection ishlatadi.
 
----
-
-# Real production example
+## Real production example
 
 ### Without pool
 
-```
+```text
 Nginx -> Django -> PostgreSQL
 ```
 
@@ -109,11 +101,9 @@ Nginx -> Django -> PostgreSQL
 
 Postgres sekinlashadi.
 
----
-
 ### With pool
 
-```
+```text
 Nginx -> Django -> PgBouncer -> PostgreSQL
 ```
 
@@ -123,11 +113,9 @@ Nginx -> Django -> PgBouncer -> PostgreSQL
 
 Qolgan requestlar reuse qiladi.
 
----
+## Pooling turlari
 
-# Pooling turlari
-
-## 1. Application-level pool
+### 1. Application-level pool
 
 Library ichida.
 
@@ -137,9 +125,7 @@ Misollar:
 - Django persistent connections
 - psycopg pool
 
----
-
-## 2. External pooler
+### 2. External pooler
 
 Alohida service.
 
@@ -149,30 +135,23 @@ Eng mashhuri:
 
 Bu production’da juda ko‘p ishlatiladi.
 
----
+## PgBouncer nima qiladi?
 
-# PgBouncer nima qiladi?
-
-```
-App connections
---->  PgBouncer  ---> PostgreSQL
+```text
+App connections ---> PgBouncer ---> PostgreSQL
 ```
 
 Client connection va actual DB connection’ni ajratadi.
 
----
+## Pooling modes (PgBouncer)
 
-# Pooling modes (PgBouncer)
-
-## Session pooling
+### Session pooling
 
 Connection clientniki bo‘lib qoladi session davomida.
 
 Safe, lekin kam efficient.
 
----
-
-## Transaction pooling
+### Transaction pooling
 
 Transaction tugashi bilan connection qaytariladi.
 
@@ -180,9 +159,7 @@ Eng mashhur mode.
 
 Performance juda yaxshi.
 
----
-
-## Statement pooling
+### Statement pooling
 
 Har statementdan keyin release.
 
@@ -190,9 +167,7 @@ Judayam aggressive.
 
 Ko‘p applar bilan incompatible.
 
----
-
-# Qachon pooling kerak?
+## Qachon pooling kerak?
 
 Deyarli har production system’da.
 
@@ -204,25 +179,22 @@ Ayniqsa:
 - Go microservices
 - High traffic APIs
 
----
-
-# Qachon oddiy open/close yetadi?
+## Qachon oddiy open/close yetadi?
 
 - CLI script
 - Small cron job
 - One-time migration
 - Local toy project
 
----
+## Muhim production muammolari
 
-# Muhim production muammolari
-
-## 1. Connection leak
+### 1. Connection leak
 
 Connection poolga qaytmay qoladi.
 
 ```python
-conn = pool.getconn() # forgot:pool.putconn(conn)
+conn = pool.getconn()
+# forgot: pool.putconn(conn)
 ```
 
 Natija:
@@ -230,23 +202,17 @@ Natija:
 - pool exhaustion
 - app hangs
 
----
-
-## 2. Idle connections
+### 2. Idle connections
 
 Juda ko‘p idle connection RAM yeydi.
 
----
-
-## 3. Long transactions
+### 3. Long transactions
 
 Pooldagi connection uzoq vaqt band bo‘lib qoladi.
 
 Boshqa requestlar kutadi.
 
----
-
-# PostgreSQL’da nega connection qimmat?
+## PostgreSQL’da nega connection qimmat?
 
 Postgres:
 
@@ -260,25 +226,21 @@ Shuning uchun:
 
 MySQL’da bu biroz yengilroq.
 
----
+## Qisqa taqqoslash
 
-# Qisqa taqqoslash
+| Feature              | Open/Close | Pooling          |
+| -------------------- | ---------- | ---------------- |
+| Performance          | Sekin      | Tez              |
+| Resource usage       | Yuqori     | Past             |
+| Scalability          | Yomon      | Yaxshi           |
+| Production readiness | Yomon      | Standard         |
+| Setup                | Oson       | Biroz murakkab   |
 
-|Feature|Open/Close|Pooling|
-|---|---|---|
-|Performance|Sekin|Tez|
-|Resource usage|Yuqori|Past|
-|Scalability|Yomon|Yaxshi|
-|Production readiness|Yomon|Standard|
-|Setup|Oson|Biroz murakkab|
-
----
-
-# Modern stack
+## Modern stack
 
 Ko‘p production stack:
 
-```
+```text
 App -> PgBouncer -> PostgreSQL
 ```
 

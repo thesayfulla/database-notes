@@ -54,35 +54,31 @@ Page darhol diskka flush qilinmasligi mumkin. U memory’da qoladi va yana boshq
 
 Delete va insert ham shu konsepsiyada ishlaydi, lekin implementation database’ga qarab farq qiladi.
 
----
-
-# Page Content
+## Page Content
 
 Page ichida nima saqlash database design’iga bog‘liq.
 
-## Row-store databases
+### Row-store databases
 
 Bunday database’lar row’larni barcha attribute’lari bilan ketma-ket page ichida saqlaydi.
 
 Masalan:
 
-| id | name | age |
-| --- | --- | --- |
-| 1 | Ali | 20 |
+| id  | name | age |
+| --- | ---- | --- |
+| 1   | Ali  | 20  |
 
 diskda ketma-ket yoziladi.
 
 Bu OLTP workload uchun juda qulay, ayniqsa write workload’da.
 
----
-
-## Column-store databases
+### Column-store databases
 
 Bu yerda esa ma’lumot column bo‘yicha saqlanadi.
 
 Masalan:
 
-```
+```text
 id column:
 1 2 3 4
 
@@ -94,15 +90,13 @@ Bu OLAP workload uchun juda foydali.
 
 Masalan:
 
-```
+```sql
 SELECT SUM(price)
 ```
 
 faqat kerakli column o‘qiladi. Bitta page ichida aynan bitta column qiymatlari packed holda saqlangani uchun aggregate funksiyalar juda tez ishlaydi.
 
----
-
-## Document databases
+### Document databases
 
 Document-based database’lar:
 
@@ -111,21 +105,16 @@ Document-based database’lar:
 
 Bu row-store’ga o‘xshaydi.
 
----
-
-## Graph databases
+### Graph databases
 
 Graph database’lar esa node va edge connectivity’ni page ichida shunday saqlaydiki:
 
 - graph traversal samarali bo‘ladi,
 - depth-first yoki breadth-first search optimallashtiriladi.
 
----
-
 Asosiy maqsad:
 
 > Page ichiga iloji boricha foydali ma’lumot joylash.
->
 
 Agar siz kichik ish uchun juda ko‘p page o‘qiyotgan bo‘lsangiz:
 
@@ -133,11 +122,9 @@ Agar siz kichik ish uchun juda ko‘p page o‘qiyotgan bo‘lsangiz:
 
 Data modeling juda underrated mavzu.
 
----
+## Small vs Large Pages
 
-# Small vs Large Pages
-
-## Small pages
+### Small pages
 
 Kichik page’lar:
 
@@ -148,9 +135,7 @@ Lekin:
 
 - page header metadata overhead oshib ketadi.
 
----
-
-## Large pages
+### Large pages
 
 Katta page’lar:
 
@@ -162,8 +147,6 @@ Lekin:
 - cold read qimmatlashadi,
 - write ham qimmatroq bo‘ladi.
 
----
-
 Storage industry bu muammoni hal qilish uchun:
 
 - Zoned Storage,
@@ -171,23 +154,19 @@ Storage industry bu muammoni hal qilish uchun:
 
 kabi texnologiyalar ustida ishlamoqda.
 
----
-
 Turli database’larning default page size’lari:
 
-| Database | Default Page Size |
-| --- | --- |
-| PostgreSQL | 8KB |
-| MySQL InnoDB | 16KB |
-| MongoDB WiredTiger | 32KB |
-| SQL Server | 8KB |
-| Oracle | 8KB |
+| Database           | Default Page Size |
+| ------------------ | ----------------- |
+| PostgreSQL         | 8KB               |
+| MySQL InnoDB       | 16KB              |
+| MongoDB WiredTiger | 32KB              |
+| SQL Server         | 8KB               |
+| Oracle             | 8KB               |
 
 Default setting’lar ko‘p holatda yetarli bo‘ladi, lekin workload’ga qarab tuning qilish muhim.
 
----
-
-# How page are stored on Disk
+## How Pages are Stored on Disk
 
 Page’larni diskda saqlashning turli usullari mavjud.
 
@@ -198,7 +177,7 @@ Oddiy usullardan biri:
 
 Misol:
 
-```
+```text
 Page0 | Page1 | Page2 | Page3
 ```
 
@@ -208,15 +187,13 @@ Agar bizga page X kerak bo‘lsa:
 - offset = X * PAGE_SIZE,
 - read length = PAGE_SIZE.
 
----
-
 Misol:
 
 Page size = 8KB.
 
 Page 2 dan 9 gacha o‘qish kerak bo‘lsa:
 
-```
+```text
 offset = 2 * 8192 = 16384
 length = 8 * 8192 = 65536 bytes
 ```
@@ -225,17 +202,13 @@ Database shu offset’dan boshlab kerakli byte’larni o‘qiydi.
 
 Lekin har bir database implementation’i boshqacha bo‘lishi mumkin.
 
----
-
-# Postgres Page Layout
+## Postgres Page Layout
 
 PostgreSQL default holatda **8KB** page ishlatadi.
 
-Page quyidagi qismlardan iborat:
+Page quyidagi qismlardan iborat.
 
----
-
-## Page header — 24 bytes
+### Page header — 24 bytes
 
 Bu page metadata’si.
 
@@ -249,15 +222,11 @@ saqlanadi.
 
 Header fixed-size — 24 byte.
 
----
-
-## ItemIds — har biri 4 byte
+### ItemIds — har biri 4 byte
 
 Bu actual tuple emas.
 
-Bu:
-
-- offset:length pointer array.
+Bu offset:length pointer array.
 
 Har bir ItemId:
 
@@ -266,9 +235,7 @@ Har bir ItemId:
 
 ko‘rsatadi.
 
----
-
-## HOT Optimization
+#### HOT optimization
 
 Bu pointer’lar sabab PostgreSQL HOT (Heap Only Tuple) optimization qila oladi.
 
@@ -285,15 +252,13 @@ Natijada:
 
 Bu juda kuchli optimization.
 
----
-
-## Tanqid (Criticism)
+#### Tanqid (criticism)
 
 Har bir ItemId 4 byte joy oladi.
 
 Agar 1000 ta item bo‘lsa:
 
-```
+```text
 1000 * 4 = 4000 bytes
 ```
 
@@ -301,53 +266,13 @@ deyarli 4KB faqat pointer’larga ketadi.
 
 Bu yarim page degani.
 
----
-
-# Row vs Tuple vs Item
-
-Bu tushunchalar farqli.
-
-## Row
-
-User ko‘radigan logical data.
-
----
-
-## Tuple
-
-Row’ning physical version’i.
-
----
-
-## Item
-
-Page ichidagi tuple entry.
-
----
-
-Bitta row uchun:
-
-- bir nechta tuple bo‘lishi mumkin.
-
-Masalan:
-
-- 1 active tuple,
-- 7 eski MVCC tuple,
-- 2 dead tuple.
-
-MVCC sabab eski transaction’lar eski tuple’larni ko‘rishi mumkin.
-
----
-
-# Items — variable length
+### Items — variable length
 
 Bu qismda actual tuple’lar joylashadi.
 
 Tuple’lar ketma-ket saqlanadi.
 
----
-
-# Special — variable length
+### Special — variable length
 
 Bu qism asosan B+Tree index leaf page’larda ishlatiladi.
 
@@ -358,9 +283,25 @@ Unda:
 
 kabi ma’lumotlar saqlanadi.
 
----
+## Row vs Tuple vs Item
 
-# Summary
+Bu tushunchalar farqli.
+
+- **Row** — user ko‘radigan logical data.
+- **Tuple** — row’ning physical version’i.
+- **Item** — page ichidagi tuple entry.
+
+Bitta row uchun bir nechta tuple bo‘lishi mumkin.
+
+Masalan:
+
+- 1 active tuple,
+- 7 eski MVCC tuple,
+- 2 dead tuple.
+
+MVCC sabab eski transaction’lar eski tuple’larni ko‘rishi mumkin.
+
+## Summary
 
 Database ichidagi hamma narsa oxir-oqibat page’larda yashaydi:
 
@@ -390,4 +331,3 @@ bo‘yicha farq qiladi.
 Lekin asosiy g‘oya bir xil:
 
 > Data fixed-size page’lar ichida saqlanadi va database shu page’lar bilan ishlaydi.
->

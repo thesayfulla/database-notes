@@ -1,13 +1,8 @@
 # Create Index Concurrently
 
-Production database’da oddiy:
+Production database’da oddiy `CREATE INDEX` juda xavfli bo‘lishi mumkin.
 
-`CREATE INDEX`
-
-juda xavfli bo‘lishi mumkin.
-
-Sababi:
-u table’ni write uchun lock qiladi.
+Sababi: u table’ni write uchun lock qiladi.
 
 Natijada:
 
@@ -17,17 +12,9 @@ Natijada:
 
 Production traffic block bo‘lishi mumkin.
 
-Shuning uchun PostgreSQL’da:
+Shuning uchun PostgreSQL’da `CREATE INDEX CONCURRENTLY` mavjud.
 
-```sql
-CREATE INDEX CONCURRENTLY
-```
-
-mavjud.
-
----
-
-# Oddiy CREATE INDEX muammosi
+## Oddiy CREATE INDEX muammosi
 
 Misol:
 
@@ -36,11 +23,7 @@ CREATE INDEX idx_users_email
 ON users(email);
 ```
 
-Postgres:
-
-ACCESS EXCLUSIVE emas,
-lekin write operation’larni
-block qiladigan lock oladi.
+Postgres ACCESS EXCLUSIVE emas, lekin write operation’larni block qiladigan lock oladi.
 
 Natija:
 
@@ -48,20 +31,13 @@ Natija:
 - UPDATE kutadi
 - DELETE kutadi
 
-Katta table’da:
-bu bir necha minut davom etishi mumkin.
+Katta table’da bu bir necha minut davom etishi mumkin.
 
----
+## Production’da nima bo‘ladi?
 
-# Production’da nima bo‘ladi?
+Tasavvur qil: 50 million row table.
 
-Tasavvur qil:
-
-50 million row table.
-
-CREATE INDEX:
-
-10 minut ishladi.
+`CREATE INDEX` 10 minut ishladi.
 
 Bu vaqt ichida:
 
@@ -69,9 +45,7 @@ Bu vaqt ichida:
 - requests queue bo‘ladi
 - timeout chiqishi mumkin
 
----
-
-# CREATE INDEX CONCURRENTLY nima qiladi?
+## CREATE INDEX CONCURRENTLY nima qiladi?
 
 Misol:
 
@@ -80,33 +54,23 @@ CREATE INDEX CONCURRENTLY idx_users_email
 ON users(email);
 ```
 
-Bu:
-
-table write operation’larini
-block qilmaydi.
+Bu table write operation’larini block qilmaydi.
 
 Production system ishlashda davom etadi.
 
----
-
-# Muhim Farq
+## Muhim farq
 
 Oddiy CREATE INDEX:
 
 - writes block bo‘ladi
 
----
-
 CREATE INDEX CONCURRENTLY:
 
 - writes davom etadi
 
----
+## Qanday ishlaydi?
 
-# Qanday ishlaydi?
-
-CONCURRENTLY
-index’ni bir nechta phase’da yaratadi.
+CONCURRENTLY index’ni bir nechta phase’da yaratadi.
 
 Taxminan:
 
@@ -115,9 +79,7 @@ Taxminan:
 3. O‘zgargan row’larni qayta sync qiladi
 4. Index valid bo‘ladi
 
----
-
-# Nega sekinroq?
+## Nega sekinroq?
 
 Chunki:
 
@@ -125,114 +87,80 @@ Chunki:
 - extra bookkeeping qiladi
 - concurrent changes’larni kuzatadi
 
-Shuning uchun:
+Shuning uchun CONCURRENTLY oddiy CREATE INDEX’dan sekinroq.
 
-CONCURRENTLY
-oddiy CREATE INDEX’dan sekinroq.
-
----
-
-# Lekin asosiy foyda
+## Lekin asosiy foyda
 
 Production traffic to‘xtamaydi.
 
 Bu eng muhim advantage.
 
----
+## Muhim cheklov
 
-# Muhim Cheklov
+CONCURRENTLY transaction ichida ishlamaydi.
 
-CONCURRENTLY
-transaction ichida ishlamaydi.
+### Xato misol
 
----
-
-# Xato Misol
-
+```sql
 BEGIN;
+
+CREATE INDEX CONCURRENTLY idx_users_email
+ON users(email);
+
+COMMIT;
+```
+
+Error:
+
+```text
+ERROR: CREATE INDEX CONCURRENTLY cannot run inside a transaction block
+```
+
+### To‘g‘ri ishlatish
 
 ```sql
 CREATE INDEX CONCURRENTLY idx_users_email
 ON users(email);
 ```
 
-COMMIT;
-
----
-
-# Error
-
-ERROR:
-CREATE INDEX CONCURRENTLY cannot run inside a transaction block
-
----
-
-# To‘g‘ri ishlatish
-
-CREATE INDEX CONCURRENTLY idx_users_email
-ON users(email);
-
 Bitta statement sifatida ishlaydi.
 
----
-
-# Lock hali ham bormi?
+## Lock hali ham bormi?
 
 Ha.
 
-Lekin juda kichik va qisqa lock’lar.
+Lekin juda kichik va qisqa lock’lar. Writes to‘liq block bo‘lmaydi.
 
-Writes to‘liq block bo‘lmaydi.
-
----
-
-# Real Hayotiy Analogiya
+## Real hayotiy analogiya
 
 Oddiy CREATE INDEX:
 
-Yo‘lni butunlay yopib,
-yangi asfalt qilish.
-
----
+Yo‘lni butunlay yopib, yangi asfalt qilish.
 
 CREATE INDEX CONCURRENTLY:
 
-Mashinalar yurayotgan paytda,
-yon tomondan ehtiyotkorlik bilan ishlash.
+Mashinalar yurayotgan paytda, yon tomondan ehtiyotkorlik bilan ishlash.
 
----
-
-# CREATE UNIQUE INDEX CONCURRENTLY
+## CREATE UNIQUE INDEX CONCURRENTLY
 
 Unique index uchun ham ishlaydi.
 
 Misol:
 
+```sql
 CREATE UNIQUE INDEX CONCURRENTLY idx_users_email
 ON users(email);
+```
 
----
+### Muhim muammo
 
-# Muhim Muammo
+Agar concurrent insert vaqtida duplicate data kirsa, unique index creation fail bo‘lishi mumkin.
 
-Agar concurrent insert vaqtida:
+## Failure holati
 
-duplicate data kirsa,
+Agar build vaqtida error chiqsa, INVALID index qolib ketishi mumkin.
 
-unique index creation fail bo‘lishi mumkin.
-
----
-
-# Failure holati
-
-Agar build vaqtida error chiqsa:
-
-INVALID index
-qolib ketishi mumkin.
-
----
-
-# Ko‘rish
+Ko‘rish:
 
 ```sql
 SELECT *
@@ -242,37 +170,27 @@ WHERE tablename = 'users';
 
 yoki:
 
+```text
 \d users
+```
 
----
+### INVALID index muammosi
 
-# INVALID index muammosi
+Agar failed bo‘lsa, index mavjud, lekin usable emas.
 
-Agar failed bo‘lsa:
+### Tozalash
 
-index mavjud,
-lekin usable emas.
-
----
-
-# Tozalash
-
+```sql
 DROP INDEX CONCURRENTLY idx_users_email;
+```
 
----
+### Nega DROP ham CONCURRENTLY?
 
-# Nega DROP ham CONCURRENTLY?
+Oddiy DROP INDEX query’larni block qilishi mumkin.
 
-Oddiy DROP INDEX:
+CONCURRENTLY esa minimal blocking bilan ishlaydi.
 
-query’larni block qilishi mumkin.
-
-CONCURRENTLY esa:
-minimal blocking bilan ishlaydi.
-
----
-
-# Resource Cost
+## Resource cost
 
 CONCURRENTLY:
 
@@ -282,97 +200,64 @@ CONCURRENTLY:
 
 ishlatadi.
 
----
+## Qachon ishlatish kerak?
 
-# Qachon ishlatish kerak?
+Production environment’da deyarli har doim.
 
-Production environment’da:
-deyarli har doim.
-
----
-
-# Qachon oddiy CREATE INDEX ishlatish mumkin?
+### Qachon oddiy CREATE INDEX ishlatish mumkin?
 
 - local development
 - maintenance window
 - kichik table
 - traffic yo‘q payt
 
----
+## Large table example
 
-# Large Table Example
-
-Table:
-500 million rows
+Table: 500 million rows.
 
 Oddiy CREATE INDEX:
 
 - write traffic’ni muzlatib qo‘yishi mumkin
-
----
 
 CREATE INDEX CONCURRENTLY:
 
 - sekinroq
 - lekin service ishlashda davom etadi
 
----
+## PostgreSQL ichki mexanizmi
 
-# PostgreSQL ichki mexanizmi
+CONCURRENTLY 2 ta table scan qiladi.
 
-CONCURRENTLY:
+Sababi: build vaqtida o‘zgargan row’larni ham ushlashi kerak.
 
-2 ta table scan qiladi.
-
-Sababi:
-build vaqtida o‘zgargan row’larni ham ushlashi kerak.
-
----
-
-# Performance tradeoff
+## Performance tradeoff
 
 Oddiy CREATE INDEX:
 
 - tezroq
 - lekin blocking
 
----
-
 CONCURRENTLY:
 
 - sekinroq
 - lekin non-blocking
 
----
+## EXPLAIN bilan bog‘liq emas
 
-# EXPLAIN bilan bog‘liq emas
+CREATE INDEX CONCURRENTLY query plan emas.
 
-CREATE INDEX CONCURRENTLY
-query plan emas.
+Bu DDL operation.
 
-Bu:
-DDL operation.
+## Best practice
 
----
+Production’da CREATE INDEX CONCURRENTLY default tanlov bo‘lishi kerak.
 
-# Best Practice
-
-Production’da:
-
-CREATE INDEX CONCURRENTLY
-
-default tanlov bo‘lishi kerak.
-
----
-
-# Qisqa Xulosa
+## Qisqa xulosa
 
 CREATE INDEX:
 
 - tezroq
 - write block qiladi
-
----
 
 CREATE INDEX CONCURRENTLY:
 
@@ -380,11 +265,6 @@ CREATE INDEX CONCURRENTLY:
 - write block qilmaydi
 - production-safe
 
----
+## Muhim eslab qol
 
-# Muhim Eslab Qol
-
-Production database’da:
-
-oddiy CREATE INDEX
-katta outage sababchisi bo‘lishi mumkin.
+Production database’da oddiy CREATE INDEX katta outage sababchisi bo‘lishi mumkin.

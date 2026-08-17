@@ -1,9 +1,11 @@
 # Master-Standby Replication
 
-![Replication Architecture](./Replication/Pasted%20image%2020260529120508.png)
+![Master-Standby replication architecture](./Replication/Pasted%20image%2020260529120508.png)
 
-Bitta asosiy **master** bo'ladi, u asosan DDLs uchun ishlatilinadi. lekin qolgan **standby**larni esa shunchaki reading operation uchun ishlatsak bo'ladi holos.
-### CORE LOGIC:
+Bitta asosiy **master** bo'ladi, u asosan DDL’lar uchun ishlatiladi. Qolgan **standby**’larni esa shunchaki reading operation uchun ishlatsak bo'ladi, xolos.
+
+### Core logic
+
 - Master (Primary) = main database
 - Standby (Replica) = copied database
 - PostgreSQL uses WAL replication
@@ -14,27 +16,27 @@ Bitta asosiy **master** bo'ladi, u asosan DDLs uchun ishlatilinadi. lekin qolgan
     - Read Scaling
     - Backup
 
-### Async Replication
+### Async replication
 
-```
+```text
 Primary COMMIT -> User OK -> Replica later
 ```
 
 - Faster
 - Possible small data loss
 
-### Sync Replication
+### Sync replication
 
-```
+```text
 Primary -> Replica ACK -> COMMIT
 ```
 
 - Safer
 - Slower
 
-### Common Problem
+### Common problem
 
-```
+```text
 Replication Lag
 ```
 

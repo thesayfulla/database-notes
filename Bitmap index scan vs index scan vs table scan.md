@@ -26,19 +26,15 @@ Postgres table’dagi barcha row’larni boshidan oxirigacha o‘qiydi.
 SELECT * FROM users WHERE is_active = true;
 ```
 
-Agar row’larning katta qismi active bo‘lsa:
-→ Seq Scan
+Agar row’larning katta qismi active bo‘lsa: → Seq Scan
 
 ### Mental model
 
-"Hamma narsani birma-bir tekshirish"
-
----
+> "Hamma narsani birma-bir tekshirish"
 
 ## 2. Index Scan
 
-Postgres index orqali kerakli row location’ni topadi,
-keyin heap(table)dan row’ni olib keladi.
+Postgres index orqali kerakli row location’ni topadi, keyin heap(table)dan row’ni olib keladi.
 
 ### Qanday ishlaydi?
 
@@ -58,8 +54,10 @@ keyin heap(table)dan row’ni olib keladi.
 
 ### Qachon ishlatiladi?
 
-- WHERE id = 10
-- WHERE email = 'x'
+```sql
+WHERE id = 10
+WHERE email = 'x'
+```
 
 ### Misol
 
@@ -76,10 +74,7 @@ WHERE email = 'a@gmail.com';
 
 ### Mental model
 
-"Avval address topiladi,
-keyin uyga boriladi"
-
----
+> "Avval address topiladi, keyin uyga boriladi"
 
 ## 3. Bitmap Index Scan
 
@@ -115,28 +110,25 @@ WHERE status = 'pending';
 
 ### Mental model
 
-"Oldin kerakli page’larni yozib olish,
-keyin tartib bilan o‘qish"
+> "Oldin kerakli page’larni yozib olish, keyin tartib bilan o‘qish"
 
----
-
-# Heap nima?
+## Heap nima?
 
 Postgres’da actual data heap’da saqlanadi.
 
 Index:
+
+```text
 value -> TID
+```
 
 xolos.
 
 Keyin heap’dan actual row olinadi.
 
----
+## Index Only Scan
 
-# Index Only Scan
-
-Agar kerakli column’larning hammasi index ichida bo‘lsa,
-heap’ga borilmaydi.
+Agar kerakli column’larning hammasi index ichida bo‘lsa, heap’ga borilmaydi.
 
 ### Misol
 
@@ -153,33 +145,29 @@ WHERE email = 'x';
 - Juda tez
 - Heap access yo‘q
 
----
+## Qisqa taqqoslash
 
-# Qisqa taqqoslash
-
-Seq Scan
+**Seq Scan**
 
 - Sequential read
 - Katta result uchun yaxshi
 
-Index Scan
+**Index Scan**
 
 - Random read
 - Juda kam row uchun yaxshi
 
-Bitmap Scan
+**Bitmap Scan**
 
 - Mixed approach
 - O‘rtacha row uchun yaxshi
 
-Index Only Scan
+**Index Only Scan**
 
 - Heap access yo‘q
 - Eng tez variantlardan biri
 
----
-
-# Planner nimalarga qaraydi?
+## Planner nimalarga qaraydi?
 
 - random_page_cost
 - seq_page_cost

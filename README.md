@@ -34,4 +34,4 @@ Complete collection of database concepts, architecture, and best practices.
 | [What is Database Cursors?](What%20is%20Database%20Cursors%3F.md) | Database Cursors |
 | [MongoDB Clustered Collections](MongoDB%20Clustered%20Collections.md) | NoSQL |
 | [Memcached In-Memory Cache Architecture](Memcached%20In-Memory%20Cache%20Architecture.md) | NoSQL |
-| [What is a distributed transactions?](distributed-transaction.md) | Transaction |
+| [What is a Distributed Transaction?](distributed-transaction.md) | Transaction |

@@ -1,3 +1,5 @@
+# Memcached In-Memory Cache Architecture
+
 ## Nima o'zi?
 
 **Memcached** — bu juda sodda va tez ishlaydigan **distributed in-memory key-value cache**.
@@ -8,11 +10,9 @@ Asosiy maqsadi:
 - Tez-tez o'qiladigan ma'lumotlarni RAM'da saqlash
 - Query natijalarini cache qilish
 
----
-
 ## Arxitektura
 
-```
+```text
                 +------------+
                 |   Client   |
                 +------------+
@@ -33,7 +33,7 @@ Asosiy maqsadi:
 
 Flow:
 
-```
+```text
 1. Client -> GET user:123
 2. Memcached:
       Found? -> Return data
@@ -43,19 +43,17 @@ Flow:
 5. Return to Client
 ```
 
----
-
-## Data Structure
+## Data structure
 
 Memcached faqat:
 
-```
+```text
 Key -> Value
 ```
 
 Misol:
 
-```
+```text
 "user:1"        -> JSON
 "product:100"   -> JSON
 "article:55"    -> HTML
@@ -68,11 +66,9 @@ Database kabi:
 - Secondary index yo'q
 - Query language yo'q
 
----
+## Internal architecture
 
-## Internal Architecture
-
-```
+```text
 +--------------------+
 | Network Thread     |
 +--------------------+
@@ -93,13 +89,11 @@ Database kabi:
 +--------------------+
 ```
 
----
-
-## 1. Hash Table
+### 1. Hash Table
 
 Key hash qilinadi:
 
-```
+```text
 "user:123"
       |
       v
@@ -109,25 +103,21 @@ hash()
 Bucket #42
 ```
 
-Shuning uchun:
+Shuning uchun o'rtacha holatda:
 
-```
-GET O(1)
-SET O(1)
+```text
+GET    O(1)
+SET    O(1)
 DELETE O(1)
 ```
 
-o'rtacha holatda.
-
----
-
-## 2. Slab Allocator
+### 2. Slab Allocator
 
 Memcached har bir object uchun `malloc()` qilmaydi.
 
 Buning o'rniga RAM'ni bloklarga bo'ladi.
 
-```
+```text
 RAM
  |
  +-- Slab Class 64B
@@ -143,13 +133,9 @@ RAM
 
 Misol:
 
-```
+```text
 Value size = 90B
-```
-
-↓
-
-```
+        ↓
 128B slabga joylanadi
 ```
 
@@ -158,71 +144,46 @@ Bu:
 - fragmentationni kamaytiradi
 - allocationni tezlashtiradi
 
----
+### 3. LRU Eviction
 
-## 3. LRU Eviction
-
-RAM to'lib qolsa:
-
-```
-Least Recently Used
-```
-
-element o'chiriladi.
-
-```
-Old Item      ↓Evicted
-```
+RAM to'lib qolsa, **Least Recently Used** element o'chiriladi.
 
 Misol:
 
-```
+```text
 RAM Full
 
-A (last access 1h ago)
+A (last access 1h ago)   <- evicted
 B (last access 10m ago)
 C (last access now)
-
-A deleted
 ```
 
----
-
-## Distributed Architecture
+## Distributed architecture
 
 Bir nechta Memcached node:
 
-```
+```text
            Client
               |
      +--------+--------+
      |                 |
      v                 v
- Node1            Node2```
-
+   Node1             Node2
 ```
 
-Odatda:
+Odatda **consistent hashing** ishlatiladi:
 
-```
-Consistent Hashing
-```
-
-ishlatiladi.
-
-```
+```text
 user:1 -> Node1
 user:2 -> Node2
 user:3 -> Node1
 ```
 
----
-
-## Cache Aside Pattern
+## Cache aside pattern
 
 Eng mashhur pattern:
 
-```
+```text
 GET user
    |
    v
@@ -247,22 +208,18 @@ Return
 
 Django'da ham ko'pincha shu ishlatiladi.
 
----
-
 ## Memcached vs Redis
 
-|Feature|Memcached|Redis|
-|---|---|---|
-|RAM only|✅|✅|
-|Persistence|❌|✅|
-|Transactions|❌|✅|
-|Replication|❌|✅|
-|Data structures|Key-Value|Ko'p|
-|Pub/Sub|❌|✅|
-|Simplicity|Juda sodda|Murakkabroq|
-|Speed|Juda tez|Juda tez|
-
----
+| Feature         | Memcached   | Redis       |
+| --------------- | ----------- | ----------- |
+| RAM only        | ✅          | ✅          |
+| Persistence     | ❌          | ✅          |
+| Transactions    | ❌          | ✅          |
+| Replication     | ❌          | ✅          |
+| Data structures | Key-Value   | Ko'p        |
+| Pub/Sub         | ❌          | ✅          |
+| Simplicity      | Juda sodda  | Murakkabroq |
+| Speed           | Juda tez    | Juda tez    |
 
 ## Qachon ishlatiladi?
 
@@ -280,8 +237,6 @@ Mos emas:
 - Banking transactionlar
 - Queue systems
 - Analytics data
-
----
 
 ## 1 jumlalik xulosa
 

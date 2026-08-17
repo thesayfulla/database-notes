@@ -6,9 +6,7 @@ Cursor bo‘lmasa database barcha rowlarni birdan yuboradi.
 
 Cursor bilan esa rowlar asta-sekin olinadi.
 
----
-
-# Simple Idea
+## Simple idea
 
 Without cursor:
 
@@ -31,35 +29,25 @@ Close cursor
 
 Rowlar bittadan process qilinadi.
 
----
+## Why use cursor?
 
-# Why Use Cursor?
-
-## Good For
+### Good for
 
 - katta dataset
-
 - memory tejash
-
 - streaming data
-
 - batch processing
-
 - background jobs
 
-## Bad For
+### Bad for
 
 - oddiy CRUD
-
 - kichik querylar
-
 - high-performance OLTP system
 
 Ko‘pincha set-based SQL cursor’dan tezroq ishlaydi.
 
----
-
-# Example (PostgreSQL)
+## Example (PostgreSQL)
 
 ```sql
 BEGIN;
@@ -75,41 +63,33 @@ CLOSE user_cursor;
 COMMIT;
 ```
 
----
-
-# Cursor Lifecycle
+## Cursor lifecycle
 
 ```text
 DECLARE -> OPEN -> FETCH -> CLOSE
 ```
 
----
+## Types of database cursors
 
-# Types of Database Cursors
+| Type         | Description                        |
+| ------------ | ---------------------------------- |
+| Forward-only | faqat oldinga yuradi               |
+| Scrollable   | oldinga va orqaga yuradi           |
+| Read-only    | row update qilolmaydi              |
+| Updatable    | current row update qilishi mumkin  |
 
-|Type|Description|
-|---|---|
-|Forward-only|faqat oldinga yuradi|
-|Scrollable|oldinga va orqaga yuradi|
-|Read-only|row update qilolmaydi|
-|Updatable|current row update qilishi mumkin|
+## Server-side vs client-side cursor
 
----
+| Feature      | Server-side Cursor          | Client-side Cursor        |
+| ------------ | --------------------------- | ------------------------- |
+| Storage      | database server             | application memory        |
+| Fetching     | row-by-row                  | hammasi birdan            |
+| Memory Usage | kam memory                  | ko‘p memory               |
+| Performance  | katta dataset uchun yaxshi  | kichik query uchun yaxshi |
+| Network      | ko‘p fetch request          | bitta katta response      |
+| Use Case     | streaming large data        | normal query              |
 
-# Server-side Cursor vs Client-side Cursor
-
-|Feature|Server-side Cursor|Client-side Cursor|
-|---|---|---|
-|Storage|database server|application memory|
-|Fetching|row-by-row|hammasi birdan|
-|Memory Usage|kam memory|ko‘p memory|
-|Performance|katta dataset uchun yaxshi|kichik query uchun yaxshi|
-|Network Usage|ko‘p fetch request|bitta katta response|
-|Use Case|streaming large data|normal query|
-
----
-
-# Server-side Cursor
+### Server-side cursor
 
 Cursor state database server ichida saqlanadi.
 
@@ -120,69 +100,54 @@ App -> FETCH 100 rows
 App -> FETCH next 100 rows
 ```
 
-## Advantages
+Advantages:
 
 - memory kam ishlatiladi
-
 - katta dataset bilan ishlay oladi
-
 - ETL va batch processing uchun yaxshi
 
-## Disadvantages
+Disadvantages:
 
 - DB resource uzoq band bo‘ladi
-
 - long transaction paydo bo‘lishi mumkin
-
 - network round-trip ko‘payadi
 
-### Real Examples
+Real examples:
 
 - millionlab row export qilish
-
 - analytics pipeline
-
 - data migration
 
----
-
-# Client-side Cursor
+### Client-side cursor
 
 Application barcha rowlarni avval memory’ga yuklaydi.
 
-```text
+```sql
 SELECT * FROM users;
 ```
 
 Keyin local iteratsiya qiladi.
 
-## Advantages
+Advantages:
 
 - oddiy
-
 - DB call kam
-
 - kichik querylarda tez
 
-## Disadvantages
+Disadvantages:
 
 - RAM ko‘p ishlatadi
-
 - katta dataset uchun yomon
 
-### Real Examples
+Real examples:
 
 - admin panel
-
 - dashboard
-
 - oddiy web request
 
----
+## Real production example
 
-# Real Production Example
-
-## Without Cursor
+### Without cursor
 
 ```python
 logs = db.query("SELECT * FROM logs")
@@ -191,12 +156,9 @@ logs = db.query("SELECT * FROM logs")
 Muammo:
 
 - 10 million row RAM’ga yuklanadi
-
 - application crash bo‘lishi mumkin
 
----
-
-## With Server-side Cursor
+### With server-side cursor
 
 ```python
 for row in cursor.fetchmany(1000):
@@ -206,12 +168,9 @@ for row in cursor.fetchmany(1000):
 Natija:
 
 - rowlar stream bo‘lib keladi
-
 - memory stabil qoladi
 
----
-
-# Important Note
+## Important note
 
 Cursor ko‘pincha set-based SQL’dan sekinroq.
 
@@ -232,9 +191,7 @@ WHERE last_login < NOW() - INTERVAL '1 year';
 
 Database engine set operation uchun optimize qilingan.
 
----
-
-# Quick Summary
+## Quick summary
 
 ```text
 Cursor = row-by-row processing tool

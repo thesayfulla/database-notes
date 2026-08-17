@@ -1,7 +1,6 @@
 # How Database Optimizers Decide to Use Indexes
 
-Database optimizer (query planner)
-har query uchun eng arzon execution plan tanlashga harakat qiladi.
+Database optimizer (query planner) har query uchun eng arzon execution plan tanlashga harakat qiladi.
 
 Optimizer:
 
@@ -11,24 +10,21 @@ Optimizer:
 
 shuni cost orqali hisoblaydi.
 
----
-
-# Optimizer nima qiladi?
+## Optimizer nima qiladi?
 
 Misol:
 
+```sql
 SELECT *
 FROM users
 WHERE email = 'a@gmail.com';
+```
 
 Optimizer o‘ylaydi:
 
-"Index ishlatish arzonmi
-yoki full table scan?"
+> "Index ishlatish arzonmi yoki full table scan?"
 
----
-
-# Optimizer asosiy maqsadi
+## Optimizer asosiy maqsadi
 
 Eng kichik:
 
@@ -38,9 +34,7 @@ Eng kichik:
 
 bilan query’ni bajarish.
 
----
-
-# Optimizer nimaga qaraydi?
+## Optimizer nimaga qaraydi?
 
 Asosiy factor’lar:
 
@@ -53,22 +47,13 @@ Asosiy factor’lar:
 7. Visibility
 8. Cost parameters
 
----
+## 1. Table size
 
-# 1. Table Size
+Agar table kichkina bo‘lsa, Seq Scan ko‘pincha tezroq.
 
-Agar table kichkina bo‘lsa:
+Sababi: butun table’ni o‘qish arzon.
 
-Seq Scan
-ko‘pincha tezroq.
-
-Sababi:
-
-Butun table’ni o‘qish arzon.
-
----
-
-# Misol
+### Misol
 
 100 row table.
 
@@ -81,65 +66,59 @@ qiladi.
 
 Bu ba’zan full scan’dan qimmat.
 
----
-
-# 2. Selectivity
+## 2. Selectivity
 
 Eng muhim concept.
 
-Selectivity =
-query qancha row qaytaradi.
+Selectivity = query qancha row qaytaradi.
 
----
-
-# High Selectivity
+### High selectivity
 
 Kam row qaytadi.
 
 Misol:
 
+```sql
 WHERE id = 10
+```
 
 yoki:
 
+```sql
 WHERE email = 'x'
+```
 
-Bu yaxshi candidate:
-→ Index Scan
+Bu yaxshi candidate: → Index Scan
 
----
-
-# Low Selectivity
+### Low selectivity
 
 Ko‘p row qaytadi.
 
 Misol:
 
+```sql
 WHERE is_active = true
+```
 
-Agar 95% row active bo‘lsa:
-
-Index foydasiz.
+Agar 95% row active bo‘lsa, index foydasiz.
 
 → Seq Scan
 
----
-
-# Nega?
+### Nega?
 
 Index ishlatilsa:
 
+```text
 index -> heap
 index -> heap
 index -> heap
+```
 
 million marta random access bo‘ladi.
 
 Seq Scan arzonroq chiqadi.
 
----
-
-# 3. Statistics
+## 3. Statistics
 
 Postgres statistics saqlaydi.
 
@@ -152,250 +131,167 @@ ANALYZE ishlaganda:
 
 yig‘iladi.
 
----
-
-# Misol
+### Misol
 
 country column:
 
+```text
 UZ = 90%
 US = 5%
 JP = 5%
+```
 
 Query:
 
+```sql
 WHERE country = 'UZ'
+```
 
 → Seq Scan ehtimoli katta.
 
----
+### ANALYZE muhimligi
 
-# ANALYZE muhimligi
+Agar statistics eski bo‘lsa, optimizer noto‘g‘ri plan tanlashi mumkin.
 
-Agar statistics eski bo‘lsa:
+## 4. Random vs Sequential I/O
 
-optimizer noto‘g‘ri plan tanlashi mumkin.
+Disk uchun sequential read random read’dan arzonroq.
 
----
+- Index Scan — random I/O ko‘p qiladi
+- Seq Scan — sequential I/O ishlatadi
+- Bitmap Scan — ikkalasining o‘rtasi
 
-# 4. Random vs Sequential I/O
+## 5. Rows estimate
 
-Disk uchun:
+Optimizer oldindan taxmin qiladi: "Nechta row qaytadi?"
 
-Sequential read
-Random read’dan arzonroq.
+Misol:
 
----
+```text
+Estimated rows: 10        -> Index Scan
+Estimated rows: 5 million -> Seq Scan
+```
 
-# Index Scan
-
-Random I/O ko‘p qiladi.
-
----
-
-# Seq Scan
-
-Sequential I/O ishlatadi.
-
----
-
-# Bitmap Scan
-
-Ikkalasining o‘rtasi.
-
----
-
-# 5. Rows Estimate
-
-Optimizer oldindan taxmin qiladi:
-
-"Nechta row qaytadi?"
-
----
-
-# Misol
-
-Estimated rows:
-10
-
-→ Index Scan
-
----
-
-Estimated rows:
-5 million
-
-→ Seq Scan
-
----
-
-# 6. Correlation
+## 6. Correlation
 
 Data table’da qanday joylashganini bildiradi.
 
----
+### High correlation
 
-# High Correlation
-
-Agar table:
-
-ORDER BY created_at
-
-bo‘yicha insert qilingan bo‘lsa,
-
-created_at index
-heap bilan yaxshi correlated bo‘ladi.
+Agar table `ORDER BY created_at` bo‘yicha insert qilingan bo‘lsa, `created_at` index heap bilan yaxshi correlated bo‘ladi.
 
 Index Scan tez ishlaydi.
 
----
+### Low correlation
 
-# Low Correlation
+Heap random joylashgan bo‘lsa, Index Scan ko‘p random I/O qiladi.
 
-Heap random joylashgan bo‘lsa:
-
-Index Scan ko‘p random I/O qiladi.
-
----
-
-# 7. Visibility Map
+## 7. Visibility map
 
 Index Only Scan uchun muhim.
 
-Agar page:
-"all-visible"
+Agar page "all-visible" bo‘lsa, heap access kerak bo‘lmaydi.
 
-bo‘lsa,
-
-heap access kerak bo‘lmaydi.
-
----
-
-# VACUUM roli
+### VACUUM roli
 
 VACUUM visibility map’ni yangilaydi.
 
-Bu:
-Index Only Scan’ni tezlashtiradi.
+Bu Index Only Scan’ni tezlashtiradi.
 
----
-
-# 8. Cost Parameters
+## 8. Cost parameters
 
 Postgres cost model ishlatadi.
 
 Muhim parameter’lar:
 
-- random_page_cost
-- seq_page_cost
-- cpu_tuple_cost
-- cpu_index_tuple_cost
+- `random_page_cost`
+- `seq_page_cost`
+- `cpu_tuple_cost`
+- `cpu_index_tuple_cost`
 
----
-
-# random_page_cost
+### random_page_cost
 
 Random disk access narxi.
 
-Katta bo‘lsa:
-optimizer index’dan qo‘rqadi.
+Katta bo‘lsa, optimizer index’dan qo‘rqadi.
 
----
+### SSD vs HDD
 
-# SSD vs HDD
+- HDD: random I/O juda qimmat
+- SSD: random I/O ancha arzon
 
-HDD:
-random I/O juda qimmat.
+Shuning uchun SSD’da Index Scan ko‘proq foydali.
 
-SSD:
-random I/O ancha arzon.
+## Real example
 
-Shuning uchun SSD’da
-Index Scan ko‘proq foydali.
+Table: 10 million row.
 
----
-
-# Real Example
-
-Table:
-10 million row
-
-Query:
-
+```sql
 SELECT *
 FROM orders
 WHERE order_id = 100;
+```
 
 → Index Scan
 
-Sababi:
-1 row qaytadi.
+Sababi: 1 row qaytadi.
 
----
+### Boshqa example
 
-# Boshqa Example
-
+```sql
 SELECT *
 FROM orders
 WHERE status = 'completed';
+```
 
-Agar:
-90% completed bo‘lsa
+Agar 90% completed bo‘lsa:
 
 → Seq Scan
 
----
+### Bitmap Scan qachon?
 
-# Bitmap Scan qachon?
+Agar 10-20% row qaytsa, planner ko‘pincha:
 
-Agar:
-
-10-20% row qaytsa
-
-planner ko‘pincha:
-
+```text
 Bitmap Index Scan
 +
 Bitmap Heap Scan
+```
 
 tanlaydi.
 
----
+## EXPLAIN ishlatish
 
-# EXPLAIN ishlatish
+Optimizer qarorini ko‘rish uchun `EXPLAIN ANALYZE` ishlatiladi.
 
-Optimizer qarorini ko‘rish uchun:
+Misol:
 
-EXPLAIN ANALYZE
-
-ishlatiladi.
-
----
-
-# Misol
-
+```sql
 EXPLAIN ANALYZE
 SELECT *
 FROM users
 WHERE email = 'x';
+```
 
----
+Natija:
 
-# Natija
-
+```text
 Index Scan using idx_users_email
+```
 
 yoki:
 
+```text
 Seq Scan on users
+```
 
 yoki:
 
+```text
 Bitmap Heap Scan
+```
 
----
-
-# Noto‘g‘ri plan sabablari
+## Noto‘g‘ri plan sabablari
 
 1. Eski statistics
 2. Yomon index
@@ -403,22 +299,20 @@ Bitmap Heap Scan
 4. Wrong cost settings
 5. Data skew
 
----
-
-# Data Skew
+### Data skew
 
 Data notekis taqsimlangan bo‘lsa.
 
 Misol:
 
+```text
 90% UZ
 10% others
+```
 
 Optimizer ba’zan noto‘g‘ri estimate qiladi.
 
----
-
-# Optimizer hech qachon "hardcoded" emas
+## Optimizer hech qachon "hardcoded" emas
 
 U:
 
@@ -428,21 +322,13 @@ U:
 
 Bu probabilistic system.
 
----
+## Mental model
 
-# Mental Model
+Optimizer har query uchun "Qaysi yo‘l kamroq disk va CPU ishlatadi?" degan savolni yechadi.
 
-Optimizer har query uchun:
+## Qisqa xulosa
 
-"Qaysi yo‘l kamroq disk va CPU ishlatadi?"
-
-degan savolni yechadi.
-
----
-
-# Qisqa Xulosa
-
-Optimizer quyilarga qaraydi:
+Optimizer quyidagilarga qaraydi:
 
 - table size
 - selectivity
@@ -453,15 +339,8 @@ Optimizer quyilarga qaraydi:
 - visibility map
 - cost settings
 
----
+## Muhim eslab qol
 
-# Muhim Eslab Qol
+Index mavjudligi uni ishlatadi degani emas.
 
-Index mavjudligi
-uni ishlatadi degani emas.
-
-Optimizer uchun:
-
-"Index ishlatish arzonmi?"
-
-shu savol eng muhim.
+Optimizer uchun "Index ishlatish arzonmi?" — shu savol eng muhim.

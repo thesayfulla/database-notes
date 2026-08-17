@@ -2,28 +2,28 @@
 
 `OFFSET` sekin bo‘lishining asosiy sababi:
 
-```
+```text
 database rowlarni skip qila olmaydi,
 ularni avval o‘qib chiqishga majbur
 ```
 
----
-
-# Misol
+## Misol
 
 ```sql
-SELECT * FROM postsORDER BY id LIMIT 10 OFFSET 1000000;
+SELECT * FROM posts
+ORDER BY id
+LIMIT 10 OFFSET 1000000;
 ```
 
 Siz o‘ylaysiz:
 
-```
+```text
 database 1,000,001-rowdan boshlaydi
 ```
 
 Lekin aslida:
 
-```
+```text
 1 -> 2 -> 3 -> ... -> 1,000,000
 ```
 
@@ -34,61 +34,44 @@ Keyin:
 - birinchi millionini tashlaydi
 - keyingi 10 tasini qaytaradi
 
----
+## Nega index yordam bermaydi?
 
-# Nega Index yordam bermaydi?
+Chunki `OFFSET` — "qancha row tashlash kerak?" degan concept.
 
-Chunki `OFFSET`:
+B+Tree index esa "qayerdan boshlash kerak?" degan savolni yaxshi bajaradi.
 
-```
-"qancha row tashlash kerak?"
-```
+Lekin "1000000 ta row skip qil" degan operation index uchun ham qimmat.
 
-degan concept.
-
-B+Tree index:
-
-```
-"qayerdan boshlash kerak?"
-```
-
-ni yaxshi bajaradi.
-
-Lekin:
-
-```
-1000000 ta row skip qil
-```
-
-degan operation index uchun ham qimmat.
-
----
-
-# Internally nima bo‘ladi?
+## Internally nima bo‘ladi?
 
 Tasavvur:
 
-```
-ORDER BY idLIMIT 10 OFFSET 1000000
+```sql
+ORDER BY id
+LIMIT 10 OFFSET 1000000
 ```
 
 PostgreSQL roughly:
 
-```
-1. index scan boshlaydi2. 1 million tuple o‘qiydi3. discard qiladi4. keyingi 10 tasini beradi
+```text
+1. index scan boshlaydi
+2. 1 million tuple o‘qiydi
+3. discard qiladi
+4. keyingi 10 tasini beradi
 ```
 
----
-
-# EXPLAIN ANALYZE’da ko‘rinishi
+## EXPLAIN ANALYZE’da ko‘rinishi
 
 ```sql
-EXPLAIN ANALYZE SELECT * FROM posts ORDER BY id LIMIT 10 OFFSET 1000000;
+EXPLAIN ANALYZE
+SELECT * FROM posts
+ORDER BY id
+LIMIT 10 OFFSET 1000000;
 ```
 
 Ko‘pincha:
 
-```
+```text
 Rows Removed by Limit: 1000000
 ```
 
@@ -96,55 +79,38 @@ ko‘rasiz.
 
 Bu juda katta red flag.
 
----
+## Performance cost
 
-# Performance Cost
+### OFFSET kichik
 
-## OFFSET kichik
-
-```
+```sql
 OFFSET 10
 ```
 
 cheap.
 
----
+### OFFSET katta
 
-## OFFSET katta
-
-```
+```sql
 OFFSET 5000000
 ```
 
-CPU:
+- CPU: ko‘p ishlaydi
+- Disk: ko‘p o‘qiydi
+- Memory: ko‘proq ishlatiladi
+- Latency: oshadi
 
-- ko‘p ishlaydi
-
-Disk:
-
-- ko‘p o‘qiydi
-
-Memory:
-
-- ko‘proq ishlatiladi
-
-Latency:
-
-- oshadi
-
----
-
-# Real Production Problem
+## Real production problem
 
 Infinite scroll:
 
-```
+```text
 page=10000
 ```
 
 API:
 
-```
+```sql
 OFFSET 99990
 ```
 
@@ -160,48 +126,39 @@ Natija:
 - cache miss
 - replication lag
 
----
-
-# Cursor Pagination nega tez?
+## Cursor pagination nega tez?
 
 ```sql
-WHERE id > 1000000 ORDER BY idLIMIT 10
+SELECT * FROM posts
+WHERE id > 1000000
+ORDER BY id
+LIMIT 10;
 ```
 
-B+Tree index:
-
-```
-to‘g‘ridan-to‘g‘ri kerakli joyga sakraydi
-```
+B+Tree index to‘g‘ridan-to‘g‘ri kerakli joyga sakraydi.
 
 Million row discard qilmaydi.
 
----
+## Visual
 
-# Visual
+### OFFSET
 
-## OFFSET
-
-```
+```text
 start ↓
 1 2 3 4 5 6 7 8 ... 1000000
-					↑  finally
+                    ↑ finally
 ```
 
----
+### Cursor
 
-## Cursor
-
-```
-jump directly here↓
-1000000 1000001 1000002
+```text
+jump directly here ↓
+                   1000000 1000001 1000002
 ```
 
----
+## PostgreSQL’da yanada yomon bo‘ladigan holatlar
 
-# PostgreSQL’da yanada yomon bo‘ladigan holatlar
-
-## Large rows
+### Large rows
 
 Agar row katta bo‘lsa:
 
@@ -211,31 +168,27 @@ Agar row katta bo‘lsa:
 
 skip qilish ham qimmatlashadi.
 
----
-
-## JOIN bilan
+### JOIN bilan
 
 ```sql
-SELECT * FROM posts JOIN users ... LIMIT 10 OFFSET 100000;
+SELECT * FROM posts
+JOIN users ...
+LIMIT 10 OFFSET 100000;
 ```
 
 join result ham materialize bo‘lishi mumkin.
 
 Juda expensive.
 
----
+## Rule
 
-# Rule
-
-## OFFSET ishlatish mumkin
+### OFFSET ishlatish mumkin
 
 - admin panel
 - page 1-10
 - small dataset
 
----
-
-## OFFSET avoid qilish kerak
+### OFFSET avoid qilish kerak
 
 - infinite scroll
 - social feed
@@ -243,9 +196,7 @@ Juda expensive.
 - million+ rows
 - realtime systems
 
----
-
-# Best Practice
+## Best practice
 
 Cursor pagination:
 
